@@ -51,7 +51,6 @@ class Player(arcade.Sprite):
 
         with open(PLAYER_SPRITE_META) as f:
             data = json.load(f)["frames"]
-<<<<<<< HEAD
 
         def load_frame(name: str, *, flip: bool = False) -> arcade.Texture:
             frame = data[name]["frame"]
@@ -79,29 +78,6 @@ class Player(arcade.Sprite):
             load_frame(run_names[1], flip=True),
             load_frame(run_names[0]),
             load_frame(run_names[1]),
-=======
-
-        def load_frame(name: str, *, flip: bool = False) -> arcade.Texture:
-            frame = data[name]["frame"]
-            return arcade.load_texture(
-                PLAYER_SPRITE_PATH,
-                x=frame["x"],
-                y=frame["y"],
-                width=frame["w"],
-                height=frame["h"],
-                flipped_horizontally=flip,
-            )
-
-        idle_name = "player1_front_0"
-        run_names = ["player1_left_0", "player1_left_1"]
-
-        self.idle_textures = [load_frame(idle_name), load_frame(idle_name, flip=True)]
-        self.run_textures = [
-            load_frame(run_names[0]),
-            load_frame(run_names[1]),
-            load_frame(run_names[0], flip=True),
-            load_frame(run_names[1], flip=True),
->>>>>>> main
         ]
 
         self.texture = self.idle_textures[0]
