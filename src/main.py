@@ -1,6 +1,7 @@
 import arcade
 
 PLAYER_SPRITE_PATH = "assets/images/player_sheet.png"
+PLAYER_SPRITE_META = "assets/images/player_sheet.json"
 
 GRAVITY = 1
 JUMP_SPEED = 20
@@ -47,23 +48,29 @@ class Player(arcade.Sprite):
     def _load_textures(self) -> None:
         """Load the idle and run textures from the sprite sheet."""
 
-        # Frames are 32x32 pixels. The sheet has two frames side by side.
-        self.idle_textures = [
-            arcade.load_texture(PLAYER_SPRITE_PATH, x=0, y=0, width=32, height=32),
-            arcade.load_texture(
-                PLAYER_SPRITE_PATH, x=0, y=0, width=32, height=32, flipped_horizontally=True
-            ),
-        ]
+        with open(PLAYER_SPRITE_META) as f:
+            data = json.load(f)["frames"]
 
+        def load_frame(name: str, *, flip: bool = False) -> arcade.Texture:
+            frame = data[name]["frame"]
+            return arcade.load_texture(
+                PLAYER_SPRITE_PATH,
+                x=frame["x"],
+                y=frame["y"],
+                width=frame["w"],
+                height=frame["h"],
+                flipped_horizontally=flip,
+            )
+
+        idle_name = "player1_front_0"
+        run_names = ["player1_left_0", "player1_left_1"]
+
+        self.idle_textures = [load_frame(idle_name), load_frame(idle_name, flip=True)]
         self.run_textures = [
-            arcade.load_texture(PLAYER_SPRITE_PATH, x=0, y=0, width=32, height=32),
-            arcade.load_texture(PLAYER_SPRITE_PATH, x=32, y=0, width=32, height=32),
-            arcade.load_texture(
-                PLAYER_SPRITE_PATH, x=0, y=0, width=32, height=32, flipped_horizontally=True
-            ),
-            arcade.load_texture(
-                PLAYER_SPRITE_PATH, x=32, y=0, width=32, height=32, flipped_horizontally=True
-            ),
+            load_frame(run_names[0]),
+            load_frame(run_names[1]),
+            load_frame(run_names[0], flip=True),
+            load_frame(run_names[1], flip=True),
         ]
 
         self.texture = self.idle_textures[0]
@@ -126,8 +133,6 @@ class Player(arcade.Sprite):
             self.texture = self.run_textures[index + direction * 2]
 
 
-
-
 class GameView(arcade.View):
     """Main game view."""
 
@@ -161,8 +166,11 @@ class GameView(arcade.View):
                 texture = TILE_MAPPING.get(tile_id)
                 if not texture:
                     continue
-                sprite = arcade.Sprite(texture, center_x=col_index * TILE_SIZE + TILE_SIZE / 2,
-                                       center_y=row_index * TILE_SIZE + TILE_SIZE / 2)
+                sprite = arcade.Sprite(
+                    texture,
+                    center_x=col_index * TILE_SIZE + TILE_SIZE / 2,
+                    center_y=row_index * TILE_SIZE + TILE_SIZE / 2,
+                )
                 self.platforms.append(sprite)
 
     def on_draw(self):
