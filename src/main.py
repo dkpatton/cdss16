@@ -1,4 +1,5 @@
 import arcade
+import json
 
 PLAYER_SPRITE_PATH = "assets/images/player_sheet.png"
 PLAYER_SPRITE_META = "assets/images/player_sheet.json"
