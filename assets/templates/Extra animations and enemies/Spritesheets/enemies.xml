@@ -1,4 +1,4 @@
-<TextureAtlas imagePath="sheet.png">
+<TextureAtlas imagePath="enemies.png">
 	<SubTexture name="barnacle.png" x="318" y="239" width="51" height="57"/>
 	<SubTexture name="barnacle_bite.png" x="528" y="220" width="51" height="58"/>
 	<SubTexture name="barnacle_dead.png" x="477" y="220" width="51" height="57"/>

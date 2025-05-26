@@ -1,4 +1,4 @@
-<TextureAtlas imagePath="sheet.png">
+<TextureAtlas imagePath="hud_spritesheet.png">
 	<SubTexture name="hud_0.png" x="230" y="0" width="30" height="38"/>
 	<SubTexture name="hud_1.png" x="196" y="41" width="26" height="37"/>
 	<SubTexture name="hud_2.png" x="55" y="98" width="32" height="38"/>
