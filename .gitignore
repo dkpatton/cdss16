@@ -31,3 +31,4 @@ venv.bak/
 .DS_Store
 *.egg-info/
 *.iml
+*.code-workspace
