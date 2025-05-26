@@ -3,5 +3,7 @@
 This file tracks tasks that require manual action.
 
 TODO:
-- Add `assets/images/player_sheet.png` sprite sheet for the Player class.
 - Add other game assets as needed.
+
+DONE:
+- Added `assets/images/player_sheet.png` sprite sheet and atlas for the Player class.
