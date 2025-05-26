@@ -8,8 +8,25 @@ JUMP_SPEED = 20
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "My Arcade Game"
-LEVEL_WIDTH = 2000
+
+# Tile/level configuration
+TILE_SIZE = 70
+
+# Simple 2D array describing the level layout. Row 0 is the bottom row.
+LEVEL_DATA = [
+    [1] * 28,
+    [0] * 28,
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [0] * 28,
+]
+
+LEVEL_WIDTH = len(LEVEL_DATA[0]) * TILE_SIZE
 PLAYER_SPEED = 5
+
+# Tile ID to sprite path mapping
+TILE_MAPPING = {
+    1: "assets/images/grassMid.png",
+}
 
 
 class Player(arcade.Sprite):
@@ -56,23 +73,43 @@ class Player(arcade.Sprite):
             self.change_y = JUMP_SPEED
             self.can_jump = False
 
-    def update(self) -> None:
-        """Move the player and apply gravity."""
+    def update(self, platforms: arcade.SpriteList | None = None) -> None:
+        """Move the player, apply gravity and handle collisions."""
 
         # Apply gravity
         self.change_y -= GRAVITY
 
-        # Move sprite
+        # --- Horizontal movement ---
         self.center_x += self.change_x
-        self.center_y += self.change_y
+        if platforms:
+            hit_list = arcade.check_for_collision_with_list(self, platforms)
+            for tile in hit_list:
+                if self.change_x > 0 and self.right > tile.left:
+                    self.right = tile.left
+                elif self.change_x < 0 and self.left < tile.right:
+                    self.left = tile.right
 
-        # Simple ground collision
-        if self.center_y < self.height / 2:
+        # --- Vertical movement ---
+        self.center_y += self.change_y
+        landed = False
+        if platforms:
+            hit_list = arcade.check_for_collision_with_list(self, platforms)
+            for tile in hit_list:
+                if self.change_y > 0 and self.top > tile.bottom:
+                    self.top = tile.bottom
+                    self.change_y = 0
+                elif self.change_y <= 0 and self.bottom < tile.top:
+                    self.bottom = tile.top
+                    self.change_y = 0
+                    landed = True
+
+        # Simple ground collision if no platform caught us
+        if not landed and self.center_y < self.height / 2:
             self.center_y = self.height / 2
             self.change_y = 0
-            self.can_jump = True
-        else:
-            self.can_jump = False
+            landed = True
+
+        self.can_jump = landed
 
         # Choose facing direction
         if self.change_x < 0:
@@ -107,9 +144,26 @@ class GameView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.player_list.append(self.player_sprite)
 
+        # Platform tiles
+        self.platforms = arcade.SpriteList(use_spatial_hash=True)
+        self._load_level()
+
         # Track pressed keys
         self.left_pressed = False
         self.right_pressed = False
+
+    def _load_level(self) -> None:
+        """Create sprites for the level layout."""
+        for row_index, row in enumerate(LEVEL_DATA):
+            for col_index, tile_id in enumerate(row):
+                if tile_id == 0:
+                    continue
+                texture = TILE_MAPPING.get(tile_id)
+                if not texture:
+                    continue
+                sprite = arcade.Sprite(texture, center_x=col_index * TILE_SIZE + TILE_SIZE / 2,
+                                       center_y=row_index * TILE_SIZE + TILE_SIZE / 2)
+                self.platforms.append(sprite)
 
     def on_draw(self):
         """Render the screen."""
@@ -117,6 +171,7 @@ class GameView(arcade.View):
 
         # Draw world sprites through the camera so they scroll
         self.camera.use()
+        self.platforms.draw()
         self.player_list.draw()
 
     def on_update(self, delta_time: float):
@@ -129,7 +184,8 @@ class GameView(arcade.View):
         else:
             self.player_sprite.change_x = 0
 
-        self.player_list.update()
+        # Update player sprite with platform collisions
+        self.player_sprite.update(self.platforms)
 
         # Keep the player within the level bounds
         half_width = self.player_sprite.width / 2
