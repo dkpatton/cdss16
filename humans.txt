@@ -1,0 +1,7 @@
+# Tasks Buffer
+
+This file tracks tasks that require manual action.
+
+TODO:
+- Add `assets/images/player_sheet.png` sprite sheet for the Player class.
+- Add other game assets as needed.
