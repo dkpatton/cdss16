@@ -63,8 +63,8 @@ class Player(arcade.Sprite):
                 flipped_horizontally=flip,
             )
 
-        idle_name = "player1_front_0"
-        run_names = ["player1_left_0", "player1_left_1"]
+        idle_name = "player1_front_1"
+        run_names = ["player1_left_0", "player1_left_1", "player1_left_2"]
 
         # Index 0 -> facing right, index 1 -> facing left
         self.idle_textures = [
@@ -72,13 +72,9 @@ class Player(arcade.Sprite):
             load_frame(idle_name),
         ]
 
-        # First two textures face right, last two face left
-        self.run_textures = [
-            load_frame(run_names[0], flip=True),
-            load_frame(run_names[1], flip=True),
-            load_frame(run_names[0]),
-            load_frame(run_names[1]),
-        ]
+        # First len(run_names) textures face right, rest face left
+        self.run_textures = [load_frame(name, flip=True) for name in run_names]
+        self.run_textures.extend(load_frame(name) for name in run_names)
 
         self.texture = self.idle_textures[0]
 
@@ -135,9 +131,9 @@ class Player(arcade.Sprite):
         if self.change_x == 0:
             self.texture = self.idle_textures[direction]
         else:
-            self._frame = (self._frame + 1) % 20
-            index = (self._frame // 10) % 2
-            self.texture = self.run_textures[index + direction * 2]
+            self._frame = (self._frame + 1) % (len(self.run_textures) // 2 * 10)
+            index = (self._frame // 10) % (len(self.run_textures) // 2)
+            self.texture = self.run_textures[index + direction * (len(self.run_textures) // 2)]
 
 
 class GameView(arcade.View):
